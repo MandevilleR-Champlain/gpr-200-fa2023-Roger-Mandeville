@@ -9,6 +9,7 @@
 #include <imgui_impl_opengl3.h>
 
 #include <ew/shader.h>
+#include <rm/texture.h>
 
 struct Vertex {
 	float x, y, z;
@@ -58,8 +59,8 @@ int main() {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init();
 
-	ew::Shader shader("assets/vertexShader.vert", "assets/fragmentShader.frag");
-
+	
+	
 	unsigned int quadVAO = createVAO(vertices, 4, indices, 6);
 
 	glBindVertexArray(quadVAO);
@@ -68,6 +69,8 @@ int main() {
 		glfwPollEvents();
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		//Set uniforms
 		shader.use();
