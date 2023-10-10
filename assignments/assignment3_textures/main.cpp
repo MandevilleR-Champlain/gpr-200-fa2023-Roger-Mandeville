@@ -8,7 +8,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include <ew/shader.h>
+#include <rm/shader.h>
 #include <rm/texture.h>
 
 struct Vertex {
@@ -32,6 +32,9 @@ unsigned short indices[6] = {
 	0, 1, 2,
 	2, 3, 0
 };
+
+float speed = 1.5f;
+float distortion = 0.5f;
 
 int main() {
 	printf("Initializing...");
@@ -59,7 +62,21 @@ int main() {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init();
 
-	
+	rm::Shader backgroundShader("assets/background.vert", "assets/background.frag");
+	rm::Shader characterShader("assets/character.vert", "assets/character.frag");
+
+	unsigned int staticTexture = rm::loadTexture("assets/joy-division.png", GL_REPEAT, GL_LINEAR);
+	unsigned int backgroundTexture = rm::loadTexture("assets/brickwall.jpeg", GL_REPEAT, GL_LINEAR);
+	unsigned int characterTexture = rm::loadTexture("assets/smiley.png", GL_REPEAT, GL_LINEAR);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, staticTexture);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, backgroundTexture);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, characterTexture);
 	
 	unsigned int quadVAO = createVAO(vertices, 4, indices, 6);
 
@@ -72,10 +89,25 @@ int main() {
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		//Set uniforms
-		shader.use();
+		float time = glfwGetTime();
+
+		backgroundShader.use();
+		backgroundShader.setInt("_Noise", 0);
+		backgroundShader.setInt("_Texture", 1);
+
+		backgroundShader.setFloat("_Time", time);
+		backgroundShader.setFloat("_Speed", speed);
+		backgroundShader.setFloat("_Distortion", distortion);
 
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
+
+		characterShader.use();
+		characterShader.setInt("_Texture", 2);
+		characterShader.setFloat("_Time", time);
+		characterShader.setFloat("_Speed", speed);
+
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
+
 
 		//Render UI
 		{
@@ -84,6 +116,18 @@ int main() {
 			ImGui::NewFrame();
 
 			ImGui::Begin("Settings");
+			if (ImGui::CollapsingHeader("Speed Settings"))
+			{
+				// Speed control
+				ImGui::SliderFloat("Character Speed", &speed, 0.0f, 8.0f);
+			}
+
+			if (ImGui::CollapsingHeader("Distortion Settings"))
+			{
+				// Distortion control
+				ImGui::SliderFloat("Distortion", &distortion, 0.0f, 0.5f);
+			}
+
 			ImGui::End();
 
 			ImGui::Render();
