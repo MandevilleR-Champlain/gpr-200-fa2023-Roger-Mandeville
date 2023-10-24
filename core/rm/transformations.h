@@ -75,5 +75,45 @@ namespace rm {
 			return rm::Scale(scale) * RotateZ(rotation.z) * RotateX(rotation.x) * RotateY(rotation.y) * rm::Translate(position);
 		}
 	};
+	inline ew::Mat4 LookAt(ew::Vec3 eye, ew::Vec3 target, ew::Vec3 up = { 0, 1, 0 })
+	{
+		ew::Vec3 f = (eye - target) / ew::Magnitude(eye - target);
+		ew::Vec3 r = ew::Cross(up, f) / ew::Magnitude(ew::Cross(up, f));
+		ew::Vec3 u = ew::Cross(f, r) / ew::Magnitude(ew::Cross(f, r));
+		return ew::Mat4(
+			r.x, r.y, r.z, -ew::Dot(r, eye),
+			u.x, u.y, u.z, -ew::Dot(u, eye),
+			f.x, f.y, f.z, -ew::Dot(f, eye),
+			0, 0, 0, 1
+		);
+	};
+
+	//Orthographic projection
+	inline ew::Mat4 Orthographic(float height, float aspect, float near, float far)
+	{
+		float width = height * aspect;
+		float r = width / 2;
+		float l = -r;
+		float t = height / 2;
+		float b = -t;
+
+		return ew::Mat4(
+			2 / (r - l), 0, 0, -(r + l) / (r - l),
+			0, 2 / (t - b), 0, -(t + b) / (t - b),
+			0, 0, -2 / (far - near), -(far + near) / (far - near),
+			0, 0, 0, 1
+		);
+	};
+
+	inline ew::Mat4 Perspective(float fov, float aspect, float near, float far)
+	{
+		return ew::Mat4(
+			1 / (tan(fov / 2) * aspect), 0, 0, 0,
+			0, 1 / tan(fov / 2), 0, 0,
+			0, 0, (near + far) / (near - far), (2 * far * near) / (near - far),
+			0, 0, -1, 0
+		);
+	};
+
 
 }
