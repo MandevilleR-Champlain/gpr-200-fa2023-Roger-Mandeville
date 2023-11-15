@@ -14,6 +14,7 @@
 #include <ew/transform.h>
 #include <ew/camera.h>
 #include <ew/cameraController.h>
+#include <rm/procGen.h>
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 void resetCamera(ew::Camera& camera, ew::CameraController& cameraController);
@@ -78,6 +79,32 @@ int main() {
 	ew::Shader shader("assets/vertexShader.vert", "assets/fragmentShader.frag");
 	unsigned int brickTexture = ew::loadTexture("assets/brick_color.jpg",GL_REPEAT,GL_LINEAR);
 
+	//Plane
+	float planeWidth = 1.f;
+	float planeHeight = 1.f;
+	int planeSubdivisions = 5;
+	ew::MeshData planeMeshData = rm::createPlane(planeWidth, planeHeight, planeSubdivisions);
+	ew::Mesh planeMesh(planeMeshData);
+	ew::Transform planeTransform;
+	planeTransform.position = ew::Vec3(-3.f, 0.f, 0.f);
+
+	//Cylinder
+	float cylinderHeight = 2.f;
+	float cylinderRadius = 1.f;
+	int cylinderSegments = 8;
+	ew::MeshData cylinderMeshData = rm::createCylidner(cylinderHeight, cylinderRadius, cylinderSegments);
+	ew::Mesh cylinderMesh(cylinderMeshData);
+	ew::Transform cylinderTransform;
+	cylinderTransform.position = ew::Vec3(-6.f, 0.f, 0.f);
+
+	//Sphere
+	float sphereRadius = 1.f;
+	int sphereSegments = 8;
+	ew::MeshData sphereMeshData = rm::createSphere(sphereRadius, sphereSegments);
+	ew::Mesh sphereMesh(sphereMeshData);
+	ew::Transform sphereTransform;
+	sphereTransform.position = ew::Vec3(3.f, 0.f, 0.f);
+
 	//Create cube
 	ew::MeshData cubeMeshData = ew::createCube(0.5f);
 	ew::Mesh cubeMesh(cubeMeshData);
@@ -120,6 +147,19 @@ int main() {
 		//Draw cube
 		shader.setMat4("_Model", cubeTransform.getModelMatrix());
 		cubeMesh.draw((ew::DrawMode)appSettings.drawAsPoints);
+
+		//Draw plane
+		shader.setMat4("_Model", planeTransform.getModelMatrix());
+		planeMesh.draw((ew::DrawMode)appSettings.drawAsPoints);
+
+		//Draw cylidner
+		shader.setMat4("_Model", cylinderTransform.getModelMatrix());
+		cylinderMesh.draw((ew::DrawMode)appSettings.drawAsPoints);
+
+		//Draw sphere
+		shader.setMat4("_Model", sphereTransform.getModelMatrix());
+		sphereMesh.draw((ew::DrawMode)appSettings.drawAsPoints);
+
 
 		//Render UI
 		{
